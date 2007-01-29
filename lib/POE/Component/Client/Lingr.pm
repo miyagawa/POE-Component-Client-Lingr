@@ -129,6 +129,10 @@ sub http_response {
         );
     }
 
+    if ($data->{ticket}) {
+        $heap->{ticket} = $data->{ticket};
+    }
+
     $kernel->yield(notify => $method, $data);
 }
 
@@ -219,6 +223,10 @@ sub create_request {
     };
 
     $args->{format} = 'json';
+
+    if ($method =~ /^room\./ && $heap->{ticket}) {
+        $args->{ticket} = $heap->{ticket};
+    }
 
     if ($heap->{session}) {
         $args->{session} = $heap->{session};
