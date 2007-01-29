@@ -1,7 +1,7 @@
 package POE::Component::Client::Lingr;
 
 use strict;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Data::Visitor::Callback;
 use HTTP::Request::Common;
@@ -251,6 +251,7 @@ sub create_request {
 sub uri_to_method {
     my $uri = shift;
     $uri =~ s/^\Q$APIBase\E//;
+    $uri =~ s/\?.*$//;
     my @method = grep length, map { s/_(\w)/uc($1)/eg; $_ } split '/', $uri;
     return join ".", @method;
 }
@@ -274,6 +275,9 @@ POE::Component::Client::Lingr - POE chat component for Lingr.com
 
 POE::Component::Client::Lingr is a POE component for Lingr API. See
 L<http://wiki.lingr.com/dev/show/HomePage> for more details about Lingr API.
+
+This module is B<beta software> and its API and implementation will be
+likely to be changed along with the development.
 
 =head1 AUTHOR
 
