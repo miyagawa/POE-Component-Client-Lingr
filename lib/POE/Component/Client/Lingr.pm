@@ -266,7 +266,7 @@ POE::Component::Client::Lingr - POE chat component for Lingr.com
 
   use POE qw(Component::Client::Lingr);
 
-  # See eg/connect.pl for sample client code
+  # See eg/bot.pl for sample client code
 
 =head1 DESCRIPTION
 
