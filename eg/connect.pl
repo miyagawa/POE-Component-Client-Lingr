@@ -44,7 +44,11 @@ sub lingr_room_enter {
     warn "Entered room: $event->{room}->{name}\n";
     warn "Occupants:\n";
     for my $occupant (@{$event->{occupants} || []}) {
-        warn "  ", ($occupant->{nickname} || "(anonymous)"), ($occupant->{client_type} eq 'automaton' ? '*' : ''), "\n";
+        my $nick = $occupant->{nickname} || "(anonymous)";
+        if ($occupant->{client_type} eq 'automaton') {
+            $nick = "($nick)";
+        }
+        warn "  $nick\n";
     }
     $heap->{room} = $event->{room};
 }
@@ -54,5 +58,15 @@ sub lingr_room_observe {
 
     for my $msg (@{$event->{messages} || []}) {
         warn "$msg->{nickname}: $msg->{text} ($msg->{timestamp})\n";
+
+        # Homework: make this pluggable
+        if ($msg->{text} =~ m!^calc: (.*)!) {
+            eval {
+                require WWW::Google::Calculator;
+                my $answer = WWW::Google::Calculator->new->calc($1); # xxx blocks!
+                $kernel->post(lingr => call => 'room.say', { message => $answer });
+            };
+            warn $@ if $@;
+        }
     }
 }
