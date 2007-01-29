@@ -1,7 +1,7 @@
 package POE::Component::Client::Lingr;
 
 use strict;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Data::Visitor::Callback;
 use HTTP::Request::Common;
@@ -10,7 +10,7 @@ use POE qw( Component::Client::HTTP );
 use URI;
 
 our $APIBase = "http://www.lingr.com/api";
-our $Debug = 1;
+our $Debug = 0;
 
 # scraped from Lingr wiki page
 our $Methods = {
@@ -60,6 +60,8 @@ sub spawn {
         Agent => "POE::Component::Client::Lingr/$VERSION",
         Alias => 'lingr_ua',
     );
+
+    1;
 }
 
 sub _start {
@@ -202,7 +204,7 @@ sub handle_response {
 sub create_request {
     my($heap, $method, $args) = @_;
 
-    my @method = split /\./, $method;
+    my @method = map { s/([A-Z])/"_".lc($1)/eg; $_ } split /\./, $method;
     my $uri = URI->new($APIBase . "/" . join("/", @method));
 
     # downgrade all parameters to utf-8, if they're Unicode
@@ -249,7 +251,7 @@ sub create_request {
 sub uri_to_method {
     my $uri = shift;
     $uri =~ s/^\Q$APIBase\E//;
-    my @method = grep length, split '/', $uri;
+    my @method = grep length, map { s/_(\w)/uc($1)/eg; $_ } split '/', $uri;
     return join ".", @method;
 }
 
