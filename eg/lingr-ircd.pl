@@ -4,7 +4,7 @@ use warnings;
 use POE qw( Component::Server::IRC Component::Client::Lingr Component::TSTP );
 use Getopt::Long;
 
-GetOptions('--api-key=s', \my $apikey, '--port' => \my $port);
+GetOptions('--api-key=s', \my $api_key, '--port' => \my $port);
 Getopt::Long::Configure("bundling");
 
 #$POE::Component::Client::Lingr::Debug = 1;
