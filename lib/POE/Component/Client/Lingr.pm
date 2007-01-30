@@ -1,7 +1,7 @@
 package POE::Component::Client::Lingr;
 
 use strict;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Data::Visitor::Callback;
 use HTTP::Request::Common;

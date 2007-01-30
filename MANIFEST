@@ -1,5 +1,6 @@
 Changes
 eg/bot.pl
+eg/lingr-ircd.pl
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
