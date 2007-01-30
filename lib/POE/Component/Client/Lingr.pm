@@ -39,34 +39,50 @@ our $Methods = {
 
 sub spawn {
     my($class, %args) = @_;
-    $args{alias} ||= 'lingr';
-    POE::Session->create(
-        inline_states => {
-            _start      => \&_start,
-            _stop       => \&_stop,
-	    _unregister => \&_unregister,
 
-	    # API
-	    register   => \&register,
-	    unregister => \&unregister,
-            notify     => \&notify,
-            call       => \&call,
-            response   => \&http_response,
-        },
+    my $self = bless {}, $class;
+
+    $self->{session_id} = POE::Session->create(
+        object_states => [
+            $self => {
+                _start      => '_start',
+                _stop       => '_stop',
+                _unregister => '_unregister',
+
+                # API
+                register   => 'register',
+                unregister => 'unregister',
+                notify     => 'notify',
+                call       => 'call',
+                http_response   => 'http_response',
+            },
+        ],
         args => [ \%args ],
-    );
+    )->ID;
 
     POE::Component::Client::HTTP->spawn(
         Agent => "POE::Component::Client::Lingr/$VERSION",
-        Alias => 'lingr_ua',
+        Alias => $self->ua_alias,
     );
 
-    1;
+    $self;
+}
+
+sub ua_alias {
+    my $self = shift;
+    return "lingr_ua_" . $self->session_id;
+}
+
+sub session_id { $_[0]->{session_id} }
+
+sub yield {
+    my $self = shift;
+    $poe_kernel->post($self->session_id, @_);
 }
 
 sub _start {
     my($kernel, $heap, $args) = @_[KERNEL, HEAP, ARG0];
-    $kernel->alias_set($args->{alias});
+    $kernel->alias_set($args->{alias}) if $args->{alias};
 }
 
 sub _stop { }
@@ -94,10 +110,10 @@ sub notify {
 }
 
 sub call {
-    my($kernel, $heap, $method, $args) = @_[KERNEL, HEAP, ARG0, ARG1];
+    my($kernel, $heap, $method, $args, $self) = @_[KERNEL, HEAP, ARG0, ARG1, OBJECT];
 
     my $req = create_request($heap, $method, $args);
-    $kernel->post(lingr_ua => request => 'response', $req);
+    $kernel->post($self->ua_alias => request => 'http_response', $req);
 }
 
 sub http_response {
@@ -276,8 +292,8 @@ POE::Component::Client::Lingr - POE chat component for Lingr.com
 POE::Component::Client::Lingr is a POE component for Lingr API. See
 L<http://wiki.lingr.com/dev/show/HomePage> for more details about Lingr API.
 
-This module is B<beta software> and its API and implementation will be
-likely to be changed along with the development.
+This module is in its B<beta quality> and the API and implementation will be
+likely changed along with the further development.
 
 =head1 AUTHOR
 

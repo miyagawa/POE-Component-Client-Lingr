@@ -46,7 +46,7 @@ sub lingr_room_enter {
     for my $occupant (@{$event->{occupants} || []}) {
         my $nick = $occupant->{nickname} || "(anonymous)";
         if ($occupant->{client_type} eq 'automaton') {
-            $nick = "($nick)";
+            $nick .= "*";
         }
         warn "  $nick\n";
     }
