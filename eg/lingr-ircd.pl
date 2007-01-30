@@ -2,16 +2,21 @@
 use strict;
 use warnings;
 use POE qw( Component::Server::IRC Component::Client::Lingr Component::TSTP );
+use Getopt::Long;
+
+GetOptions('--api-key=s', \my $apikey, '--port' => \my $port);
+Getopt::Long::Configure("bundling");
 
 #$POE::Component::Client::Lingr::Debug = 1;
 
-my $api_key = $ARGV[0] or die "Usage: lingr-ircd.pl API_KEY\n";
+$api_key or die "Usage: lingr-ircd.pl API_KEY\n";
 
 our $Root = "lingr";
 
 my $config = {
     api_key => $api_key,
-    server  => 'irc.lingr',
+    server  => "lingr.ircd",
+    port    => $port,
 };
 
 # for Ctrl-Z
@@ -170,6 +175,8 @@ sub lingr_room_enter {
 
     # Set topic
     $heap->{ircd}->_daemon_cmd_topic($heap->{nick}, $heap->{channel}, $event->{room}->{description});
+
+    # TODO: display recent messages by $Root user
 }
 
 sub join_nick {
